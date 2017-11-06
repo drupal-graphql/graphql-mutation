@@ -76,7 +76,7 @@ class EntityInputDeriver extends DeriverBase implements ContainerDeriverInterfac
             continue;
           }
 
-          $type = StringHelper::camelCase([$entityTypeId, $fieldName, 'field', 'input']);
+          $type = StringHelper::camelCase($entityTypeId, $fieldName, 'field', 'input');
           $fieldStorage = $field->getFieldStorageDefinition();
           $propertyDefinitions = $fieldStorage->getPropertyDefinitions();
 
@@ -102,7 +102,7 @@ class EntityInputDeriver extends DeriverBase implements ContainerDeriverInterfac
         }
 
         $this->derivatives["$entityTypeId:$bundleName:create"] = [
-          'name' => StringHelper::camelCase([$entityTypeId, $bundleName, 'create', 'input']),
+          'name' => StringHelper::camelCase($entityTypeId, $bundleName, 'create', 'input'),
           'fields' => $createFields,
           'entity_type' => $entityTypeId,
           'entity_bundle' => $bundleName,
@@ -110,7 +110,7 @@ class EntityInputDeriver extends DeriverBase implements ContainerDeriverInterfac
         ] + $basePluginDefinition;
 
         $this->derivatives["$entityTypeId:$bundleName:update"] = [
-          'name' => StringHelper::camelCase([$entityTypeId, $bundleName, 'update', 'input']),
+          'name' => StringHelper::camelCase($entityTypeId, $bundleName, 'update', 'input'),
           'fields' => $updateFields,
           'entity_type' => $entityTypeId,
           'entity_bundle' => $bundleName,

@@ -79,7 +79,7 @@ class EntityInputFieldDeriver extends DeriverBase implements ContainerDeriverInt
         }
 
         $this->derivatives["$entityTypeId:$fieldName"] = [
-          'name' => StringHelper::camelCase([$entityTypeId, $fieldName, 'field', 'input']),
+          'name' => StringHelper::camelCase($entityTypeId, $fieldName, 'field', 'input'),
           'fields' => $properties,
           'entity_type' => $entityTypeId,
           'field_name' => $fieldName,
