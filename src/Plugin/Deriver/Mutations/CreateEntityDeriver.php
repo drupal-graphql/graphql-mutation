@@ -58,10 +58,10 @@ class CreateEntityDeriver extends DeriverBase implements ContainerDeriverInterfa
 
       foreach ($this->entityTypeBundleInfo->getBundleInfo($entityTypeId) as $bundleName => $bundle) {
         $this->derivatives["$entityTypeId:$bundleName"] = [
-          'name' => StringHelper::propCase(['create', $entityTypeId, $bundleName]),
+          'name' => StringHelper::propCase('create', $entityTypeId, $bundleName),
           'arguments' => [
             'input' => [
-              'type' => StringHelper::camelCase([$entityTypeId, $bundleName, 'create', 'input']),
+              'type' => StringHelper::camelCase($entityTypeId, $bundleName, 'create', 'input'),
               'nullable' => FALSE,
               'multi' => FALSE,
             ],
