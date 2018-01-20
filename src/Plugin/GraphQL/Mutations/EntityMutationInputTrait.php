@@ -11,29 +11,6 @@ use Youshido\GraphQL\Type\Scalar\AbstractScalarType;
 trait EntityMutationInputTrait {
 
   /**
-   * Loads the schema builder from the resolve info.
-   *
-   * @param \Youshido\GraphQL\Execution\ResolveInfo $info
-   *   The resolve info object.
-   *
-   * @return \Drupal\graphql\Plugin\GraphQL\PluggableSchemaBuilderInterface
-   *   The schema builder.
-   */
-  protected function getSchemaBuilderFromResolveInfo(ResolveInfo $info) {
-    $schema = isset($info) ? $info->getExecutionContext()->getSchema() : NULL;
-    if (!$schema instanceof Schema) {
-      throw new \LogicException('Could not load schema from execution context.');
-    }
-
-    $schemaPlugin = $schema->getSchemaPlugin();
-    if (!$schemaPlugin instanceof PluggableSchemaPluginInterface) {
-      throw new \LogicException('Could not load schema plugin from schema.');
-    }
-
-    return $schemaPlugin->getSchemaBuilder();
-  }
-
-  /**
    * Extract entity values from the resolver args.
    *
    * Loops over all input values and assigns them to their original field names.
@@ -49,8 +26,7 @@ trait EntityMutationInputTrait {
    *   The extracted entity values with their proper, internal field names.
    */
   protected function extractEntityInput(array $inputArgs, InputObjectType $inputType, ResolveInfo $info) {
-    $builder = $this->getSchemaBuilderFromResolveInfo($info);
-    $fields = $inputType->getPlugin($builder)->getPluginDefinition()['fields'];
+    $fields = $inputType->getPlugin()->getPluginDefinition()['fields'];
     return array_reduce(array_keys($inputArgs), function($carry, $current) use ($fields, $inputArgs, $inputType, $info) {
       $isMulti = $fields[$current]['multi'];
       $fieldName = $fields[$current]['field_name'];
@@ -92,8 +68,7 @@ trait EntityMutationInputTrait {
    *   The extracted field values with their proper, internal property names.
    */
   protected function extractEntityFieldInput(array $fieldValue, InputObjectType $fieldType, ResolveInfo $info) {
-    $builder = $this->getSchemaBuilderFromResolveInfo($info);
-    $properties = $fieldType->getPlugin($builder)->getPluginDefinition()['fields'];
+    $properties = $fieldType->getPlugin()->getPluginDefinition()['fields'];
     return array_reduce(array_keys($fieldValue), function($carry, $current) use ($properties, $fieldValue) {
       $key = $properties[$current]['property_name'];
       $value = $fieldValue[$current];
