@@ -70,10 +70,12 @@ class EntityInputFieldDeriver extends DeriverBase implements ContainerDeriverInt
             continue;
           }
 
+          $typeName = 'String';
+          $typeName = $propertyDefinition->isList() ? StringHelper::listType($typeName) : $typeName;
+          $typeName = $propertyDefinition->isRequired() ? StringHelper::nonNullType($typeName) : $typeName;
+
           $properties[StringHelper::propCase($propertyName)] = [
-            'type' => 'String',
-            'nullable' => !$propertyDefinition->isRequired(),
-            'multi' => $propertyDefinition->isList(),
+            'type' => $typeName,
             'property_name' => $propertyName,
           ];
         }
