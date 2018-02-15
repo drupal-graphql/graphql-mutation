@@ -22,17 +22,13 @@ class DeleteEntityDeriver extends DeriverBase implements ContainerDeriverInterfa
    * {@inheritdoc}
    */
   public static function create(ContainerInterface $container, $basePluginId) {
-    return new static(
-      $container->get('entity_type.manager')
-    );
+    return new static($container->get('entity_type.manager'));
   }
 
   /**
    * {@inheritdoc}
    */
-  public function __construct(
-    EntityTypeManagerInterface $entityTypeManager
-  ) {
+  public function __construct(EntityTypeManagerInterface $entityTypeManager) {
     $this->entityTypeManager = $entityTypeManager;
   }
   /**
@@ -46,7 +42,7 @@ class DeleteEntityDeriver extends DeriverBase implements ContainerDeriverInterfa
       }
 
       $this->derivatives[$entityTypeId] = [
-        'name' => 'delete' . StringHelper::camelCase($entityTypeId),
+        'name' => StringHelper::propCase('delete', $entityTypeId),
         'entity_type' => $entityTypeId,
       ] + $basePluginDefinition;
     }

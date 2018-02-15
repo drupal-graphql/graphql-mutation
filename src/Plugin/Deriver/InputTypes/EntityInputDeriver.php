@@ -76,28 +76,27 @@ class EntityInputDeriver extends DeriverBase implements ContainerDeriverInterfac
             continue;
           }
 
-          $type = StringHelper::camelCase($entityTypeId, $fieldName, 'field', 'input');
+          $typeName = StringHelper::camelCase($entityTypeId, $fieldName, 'field', 'input');
           $fieldStorage = $field->getFieldStorageDefinition();
           $propertyDefinitions = $fieldStorage->getPropertyDefinitions();
 
           // Skip this field input type if it's a single value field.
           if (count($propertyDefinitions) == 1 && array_keys($propertyDefinitions)[0] === $fieldStorage->getMainPropertyName()) {
-            $type = 'String';
+            $typeName = 'String';
           }
 
           $fieldKey = StringHelper::propCase($fieldName);
+          $typeName = $field->getFieldStorageDefinition()->isMultiple() ? StringHelper::listType($typeName) : $typeName;
           $fieldDefinition = [
-            'type' => $type,
-            'multi' => $field->getFieldStorageDefinition()->isMultiple(),
             'field_name' => $fieldName,
           ];
 
           $createFields[$fieldKey] = $fieldDefinition + [
-            'nullable' => !$field->isRequired(),
+            'type' => $field->isRequired() ? StringHelper::nonNullType($typeName) : $typeName,
           ];
 
           $updateFields[$fieldKey] = $fieldDefinition + [
-            'nullable' => TRUE,
+            'type' => $typeName,
           ];
         }
 

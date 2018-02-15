@@ -57,20 +57,14 @@ class UpdateEntityDeriver extends DeriverBase implements ContainerDeriverInterfa
       }
 
       foreach ($this->entityTypeBundleInfo->getBundleInfo($entityTypeId) as $bundleName => $bundle) {
+        $inputType = StringHelper::camelCase($entityTypeId, $bundleName, 'update', 'input');
+        $inputType = StringHelper::nonNullType($inputType);
 
         $this->derivatives["$entityTypeId:$bundleName"] = [
-          'name' => 'update' . StringHelper::camelCase($entityTypeId, $bundleName),
+          'name' => StringHelper::propCase('update', $entityTypeId, $bundleName),
           'arguments' => [
-            'id' => [
-              'type' => 'String',
-              'nullable' => FALSE,
-              'multi' => FALSE,
-            ],
-            'input' => [
-              'type' => StringHelper::camelCase($entityTypeId, $bundleName, 'update', 'input'),
-              'nullable' => FALSE,
-              'multi' => FALSE,
-            ],
+            'id' => 'String!',
+            'input' => $inputType,
           ],
           'entity_type' => $entityTypeId,
           'entity_bundle' => $bundleName,

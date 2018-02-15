@@ -6,6 +6,7 @@ use Drupal\graphql\GraphQL\Schema\Schema;
 use Drupal\graphql\GraphQL\Type\InputObjectType;
 use Drupal\graphql\Plugin\GraphQL\PluggableSchemaPluginInterface;
 use Youshido\GraphQL\Execution\ResolveInfo;
+use Youshido\GraphQL\Type\ListType\ListType;
 use Youshido\GraphQL\Type\Scalar\AbstractScalarType;
 
 trait EntityMutationInputTrait {
@@ -15,34 +16,35 @@ trait EntityMutationInputTrait {
    *
    * Loops over all input values and assigns them to their original field names.
    *
-   * @param array $inputArgs
+   * @param array $args
    *   The entity values provided through the resolver args.
-   * @param \Drupal\graphql\GraphQL\Type\InputObjectType $inputType
-   *   The input type.
    * @param \Youshido\GraphQL\Execution\ResolveInfo $info
    *   The resolve info object.
    *
    * @return array
    *   The extracted entity values with their proper, internal field names.
    */
-  protected function extractEntityInput(array $inputArgs, InputObjectType $inputType, ResolveInfo $info) {
+  protected function extractEntityInput(array $args, ResolveInfo $info) {
+    /** @var \Drupal\graphql\GraphQL\Type\InputObjectType $inputType */
+    $inputType = $info->getField()->getArgument('input')->getType()->getNamedType();
     $fields = $inputType->getPlugin()->getPluginDefinition()['fields'];
-    return array_reduce(array_keys($inputArgs), function($carry, $current) use ($fields, $inputArgs, $inputType, $info) {
-      $isMulti = $fields[$current]['multi'];
+
+    return array_reduce(array_keys($args['input']), function($carry, $current) use ($fields, $args, $info, $inputType) {
+      $nullableType = $inputType->getField($current)->getType()->getNullableType();
+      $isMulti = $nullableType instanceof ListType;
       $fieldName = $fields[$current]['field_name'];
-      $fieldValue = $inputArgs[$current];
+      $fieldValue = $args['input'][$current];
 
-      /** @var \Drupal\graphql\GraphQL\Type\InputObjectType $fieldType */
-      $fieldType = $inputType->getField($current)->getType()->getNamedType();
-
-      if ($fieldType instanceof AbstractScalarType) {
+      /** @var \Drupal\graphql\GraphQL\Type\InputObjectType $namedType */
+      $namedType = $nullableType->getNamedType();
+      if ($namedType instanceof AbstractScalarType) {
         return $carry + [$fieldName => $fieldValue];
       }
 
-      if ($fieldType instanceof InputObjectType) {
-        $fieldValue = $isMulti ? array_map(function($value) use ($fieldType, $info) {
-          return $this->extractEntityFieldInput($value, $fieldType, $info);
-        }, $fieldValue) : $this->extractEntityFieldInput($fieldValue, $fieldType, $info);
+      if ($namedType instanceof InputObjectType) {
+        $fieldValue = $isMulti ? array_map(function($value) use ($namedType, $info) {
+          return $this->extractEntityFieldInput($value, $namedType, $info);
+        }, $fieldValue) : $this->extractEntityFieldInput($fieldValue, $namedType, $info);
 
         return $carry + [$fieldName => $fieldValue];
       }

@@ -9,12 +9,11 @@ use Drupal\graphql_core\Plugin\GraphQL\Mutations\Entity\DeleteEntityBase;
  *
  * @GraphQLMutation(
  *   id = "delete_entity",
- *   type = "EntityCrudOutput",
+ *   type = "EntityCrudOutput!",
  *   secure = true,
  *   arguments = {
  *     "id" = "String"
  *   },
- *   nullable = false,
  *   schema_cache_tags = {"entity_types"},
  *   deriver = "Drupal\graphql_mutation\Plugin\Deriver\Mutations\DeleteEntityDeriver"
  * )
