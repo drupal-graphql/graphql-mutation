@@ -2,12 +2,12 @@
 
 namespace Drupal\graphql_mutation\Plugin\GraphQL\Mutations;
 
-use Drupal\graphql\GraphQL\Schema\Schema;
-use Drupal\graphql\GraphQL\Type\InputObjectType;
-use Drupal\graphql\Plugin\GraphQL\PluggableSchemaPluginInterface;
-use Youshido\GraphQL\Execution\ResolveInfo;
-use Youshido\GraphQL\Type\ListType\ListType;
-use Youshido\GraphQL\Type\Scalar\AbstractScalarType;
+use Drupal\graphql\GraphQL\Execution\ResolveContext;
+use GraphQL\Language\AST\ListType;
+use GraphQL\Type\Definition\InputObjectType;
+use GraphQL\Type\Definition\ResolveInfo;
+use GraphQL\Type\Definition\ScalarType;
+use GraphQL\Type\Definition\Type;
 
 trait EntityMutationInputTrait {
 
@@ -18,26 +18,25 @@ trait EntityMutationInputTrait {
    *
    * @param array $args
    *   The entity values provided through the resolver args.
-   * @param \Youshido\GraphQL\Execution\ResolveInfo $info
+   * @param \GraphQL\Type\Definition\ResolveInfo $info
    *   The resolve info object.
    *
    * @return array
    *   The extracted entity values with their proper, internal field names.
    */
-  protected function extractEntityInput(array $args, ResolveInfo $info) {
-    /** @var \Drupal\graphql\GraphQL\Type\InputObjectType $inputType */
-    $inputType = $info->getField()->getArgument('input')->getType()->getNamedType();
-    $fields = $inputType->getPlugin()->getPluginDefinition()['fields'];
+  protected function extractEntityInput($value, array $args, ResolveContext $context, ResolveInfo $info) {
+    $definition = $this->getPluginDefinition();
+    $inputType = $info->schema->getType($definition['input_type']);
+    $fields = isset($inputType->config['field_map']) ? $inputType->config['field_map'] : [];
 
     return array_reduce(array_keys($args['input']), function($carry, $current) use ($fields, $args, $info, $inputType) {
-      $nullableType = $inputType->getField($current)->getType()->getNullableType();
+      $nullableType = Type::getNullableType($inputType->getField($current)->getType());
       $isMulti = $nullableType instanceof ListType;
-      $fieldName = $fields[$current]['field_name'];
+      $fieldName = $fields[$current];
       $fieldValue = $args['input'][$current];
 
-      /** @var \Drupal\graphql\GraphQL\Type\InputObjectType $namedType */
-      $namedType = $nullableType->getNamedType();
-      if ($namedType instanceof AbstractScalarType) {
+      $namedType = Type::getNamedType($nullableType);
+      if ($namedType instanceof ScalarType) {
         return $carry + [$fieldName => $fieldValue];
       }
 
@@ -61,18 +60,18 @@ trait EntityMutationInputTrait {
    *
    * @param array $fieldValue
    *   The field values keyed by property name.
-   * @param \Drupal\graphql\GraphQL\Type\InputObjectType $fieldType
+   * @param \GraphQL\Type\Definition\InputObjectType $fieldType
    *   The field type.
-   * @param \Youshido\GraphQL\Execution\ResolveInfo $info
+   * @param \GraphQL\Type\Definition\ResolveInfo $info
    *   The resolve info object.
    *
    * @return array
    *   The extracted field values with their proper, internal property names.
    */
   protected function extractEntityFieldInput(array $fieldValue, InputObjectType $fieldType, ResolveInfo $info) {
-    $properties = $fieldType->getPlugin()->getPluginDefinition()['fields'];
+    $properties = isset($fieldType->config['property_map']) ? $fieldType->config['property_map'] : [];
     return array_reduce(array_keys($fieldValue), function($carry, $current) use ($properties, $fieldValue) {
-      $key = $properties[$current]['property_name'];
+      $key = $properties[$current];
       $value = $fieldValue[$current];
 
       return $carry + [$key => $value];

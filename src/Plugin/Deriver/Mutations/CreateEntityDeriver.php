@@ -57,7 +57,7 @@ class CreateEntityDeriver extends DeriverBase implements ContainerDeriverInterfa
       }
 
       foreach ($this->entityTypeBundleInfo->getBundleInfo($entityTypeId) as $bundleName => $bundle) {
-        $inputType = StringHelper::camelCase($entityTypeId, $bundleName, 'create', 'input');
+        $inputType = $originalInputType = StringHelper::camelCase($entityTypeId, $bundleName, 'create', 'input');
         $inputType = StringHelper::nonNullType($inputType);
 
         $this->derivatives["$entityTypeId:$bundleName"] = [
@@ -65,6 +65,7 @@ class CreateEntityDeriver extends DeriverBase implements ContainerDeriverInterfa
           'arguments' => [
             'input' => $inputType,
           ],
+          'input_type' => $originalInputType,
           'entity_type' => $entityTypeId,
           'entity_bundle' => $bundleName,
         ] + $basePluginDefinition;
