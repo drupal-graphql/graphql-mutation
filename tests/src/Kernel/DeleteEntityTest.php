@@ -4,7 +4,7 @@ namespace Drupal\Tests\graphql_mutation\Kernel;
 
 use Drupal\simpletest\ContentTypeCreationTrait;
 use Drupal\simpletest\NodeCreationTrait;
-use Drupal\Tests\graphql\Kernel\GraphQLFileTestBase;
+use Drupal\Tests\graphql\Kernel\GraphQLTestBase;
 use Drupal\user\Entity\Role;
 
 /**
@@ -12,7 +12,7 @@ use Drupal\user\Entity\Role;
  *
  * @group graphql_mutation
  */
-class DeleteEntityTest extends GraphQLFileTestBase {
+class DeleteEntityTest extends GraphQLTestBase {
   use ContentTypeCreationTrait;
   use NodeCreationTrait;
 
@@ -50,7 +50,9 @@ class DeleteEntityTest extends GraphQLFileTestBase {
    */
   public function testDeletion() {
     $node = $this->createNode(['type' => 'test']);
-    $result = $this->executeQueryFile('delete.gql', ['id' => $node->id()]);
+
+    $query = $this->getQueryFromFile('delete.gql');
+    $result = $this->query($query, ['id' => $node->id()]);
     $entity = $result['data']['deleteNode']['entity'];
     $errors = $result['data']['deleteNode']['errors'];
 
@@ -67,7 +69,8 @@ class DeleteEntityTest extends GraphQLFileTestBase {
       ->save();
 
     $node = $this->createNode(['type' => 'test']);
-    $result = $this->executeQueryFile('delete.gql', ['id' => $node->id()]);
+    $query = $this->getQueryFromFile('delete.gql');
+    $result = $this->query($query, ['id' => $node->id()]);
     $errors = $result['data']['deleteNode']['errors'];
 
     $this->assertNotEmpty($errors, 'Failed to delete entity.');
@@ -78,7 +81,8 @@ class DeleteEntityTest extends GraphQLFileTestBase {
    * Test deletion of a non-existent entity.
    */
   public function testDeletionOfNonExistentEntity() {
-    $result = $this->executeQueryFile('delete.gql', ['id' => '123']);
+    $query = $this->getQueryFromFile('delete.gql');
+    $result = $this->query($query, ['id' => '123']);
     $errors = $result['data']['deleteNode']['errors'];
 
     $this->assertNotEmpty($errors, 'Failed to delete entity.');

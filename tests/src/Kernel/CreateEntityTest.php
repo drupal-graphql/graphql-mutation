@@ -3,7 +3,7 @@
 namespace Drupal\Tests\graphql_mutation\Kernel;
 
 use Drupal\simpletest\ContentTypeCreationTrait;
-use Drupal\Tests\graphql\Kernel\GraphQLFileTestBase;
+use Drupal\Tests\graphql\Kernel\GraphQLTestBase;
 use Drupal\user\Entity\Role;
 
 /**
@@ -11,7 +11,7 @@ use Drupal\user\Entity\Role;
  *
  * @group graphql_mutation
  */
-class CreateEntityTest extends GraphQLFileTestBase {
+class CreateEntityTest extends GraphQLTestBase {
   use ContentTypeCreationTrait;
 
   /**
@@ -54,7 +54,8 @@ class CreateEntityTest extends GraphQLFileTestBase {
       ],
     ];
 
-    $result = $this->executeQueryFile('create.gql', ['input' => $values]);
+    $query = $this->getQueryFromFile('create.gql');
+    $result = $this->query($query, ['input' => $values]);
     $entity = $result['data']['createNodeTest']['entity'];
     $errors = $result['data']['createNodeTest']['errors'];
     $violations = $result['data']['createNodeTest']['violations'];
@@ -69,7 +70,8 @@ class CreateEntityTest extends GraphQLFileTestBase {
    * Test creation with missing values for a required field.
    */
   public function testCreationWithViolations() {
-    $result = $this->executeQueryFile('create.gql', ['input' => []]);
+    $query = $this->getQueryFromFile('create.gql');
+    $result = $this->query($query, ['input' => []]);
     $errors = $result['data']['createNodeTest']['errors'];
     $violations = $result['data']['createNodeTest']['violations'];
 
@@ -89,7 +91,8 @@ class CreateEntityTest extends GraphQLFileTestBase {
       ->revokePermission('create test content')
       ->save();
 
-    $result = $this->executeQueryFile('create.gql', ['input' => []]);
+    $query = $this->getQueryFromFile('create.gql');
+    $result = $this->query($query, ['input' => []]);
     $errors = $result['data']['createNodeTest']['errors'];
 
     $this->assertNotEmpty($errors, 'Failed to create entity.');

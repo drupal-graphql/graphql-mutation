@@ -4,7 +4,7 @@ namespace Drupal\Tests\graphql_mutation\Kernel;
 
 use Drupal\simpletest\ContentTypeCreationTrait;
 use Drupal\simpletest\NodeCreationTrait;
-use Drupal\Tests\graphql\Kernel\GraphQLFileTestBase;
+use Drupal\Tests\graphql\Kernel\GraphQLTestBase;
 use Drupal\user\Entity\Role;
 
 /**
@@ -12,7 +12,7 @@ use Drupal\user\Entity\Role;
  *
  * @group graphql_mutation
  */
-class UpdateEntityTest extends GraphQLFileTestBase {
+class UpdateEntityTest extends GraphQLTestBase {
   use ContentTypeCreationTrait;
   use NodeCreationTrait;
 
@@ -64,7 +64,8 @@ class UpdateEntityTest extends GraphQLFileTestBase {
       ],
     ];
 
-    $result = $this->executeQueryFile('update.gql', ['id' => $node->id(), 'input' => $values]);
+    $query = $this->getQueryFromFile('update.gql');
+    $result = $this->query($query, ['id' => $node->id(), 'input' => $values]);
     $entity = $result['data']['updateNodeTest']['entity'];
     $errors = $result['data']['updateNodeTest']['errors'];
     $violations = $result['data']['updateNodeTest']['violations'];
@@ -84,7 +85,8 @@ class UpdateEntityTest extends GraphQLFileTestBase {
       'title' => 'Test node (original)',
     ]);
 
-    $result = $this->executeQueryFile('update.gql', ['id' => $node->id(), 'input' => [
+    $query = $this->getQueryFromFile('update.gql');
+    $result = $this->query($query, ['id' => $node->id(), 'input' => [
       'title' => NULL,
     ]]);
 
@@ -112,7 +114,8 @@ class UpdateEntityTest extends GraphQLFileTestBase {
       ->revokePermission('edit any test content')
       ->save();
 
-    $result = $this->executeQueryFile('update.gql', ['id' => $node->id(), 'input' => []]);
+    $query = $this->getQueryFromFile('update.gql');
+    $result = $this->query($query, ['id' => $node->id(), 'input' => []]);
     $errors = $result['data']['updateNodeTest']['errors'];
 
     $this->assertNotEmpty($errors, 'Failed to update entity.');
