@@ -35,6 +35,8 @@ class UpdateEntityTest extends GraphQLTestBase {
     parent::setUp();
     $this->installConfig('node');
     $this->installConfig('filter');
+    $this->installConfig('user');
+    $this->installEntitySchema('user');
     $this->installEntitySchema('node');
     $this->installSchema('node', 'node_access');
     $this->createContentType(['type' => 'test']);
